@@ -11,9 +11,12 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/auth/check", {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/check`,
+          {
+            credentials: "include",
+          }
+        );
         const data = await res.json();
         if (!data.loggedIn) {
           toast.error("Please login first!");
