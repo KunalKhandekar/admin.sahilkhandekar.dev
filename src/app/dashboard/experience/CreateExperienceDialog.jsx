@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,39 +15,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
+import { useS3Upload } from "@/hooks/useS3Upload";
+import Image from "next/image";
+import { useState } from "react";
 import { toast } from "sonner";
 
+const INITIAL_FORM = {
+  companyLogo: "/placeholder.png",
+  title: "",
+  location: "",
+  timeLine: "",
+  isCurrent: false,
+  keyAchievements: [],
+  technologiesUsed: [],
+};
+
 export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
-  const [formData, setFormData] = useState({
-    companyLogo: "/placeholder.png",
-    title: "",
-    location: "",
-    timeLine: "",
-    isCurrent: false,
-    keyAchievements: [],
-    technologiesUsed: [],
-  });
-
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
-  const [newAchievement, setNewAchievement] = useState("");
-  const [newTechnology, setNewTechnology] = useState("");
   const [logoPreview, setLogoPreview] = useState("/placeholder.png");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const { upload, uploading } = useS3Upload();
 
-  const handleChange = (field, value) => {
+  const updateField = (field, value) =>
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+  const addTag = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: [...prev[field], value] }));
   };
 
-  const handleAddTag = (field, value, setValue) => {
-    if (!value.trim()) return;
-    setFormData((prev) => ({
-      ...prev,
-      [field]: [...prev[field], value.trim()],
-    }));
-    setValue("");
-  };
-
-  const handleRemoveTag = (field, index) => {
+  const removeTag = (field, index) => {
     setFormData((prev) => ({
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index),
@@ -55,12 +52,17 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
   };
 
   const handleFileChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const previewURL = URL.createObjectURL(file);
-      setLogoPreview(previewURL);
-      setFormData((prev) => ({ ...prev, companyLogo: previewURL }));
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoPreview(URL.createObjectURL(file));
+      setSelectedFile(file);
     }
+  };
+
+  const resetForm = () => {
+    setFormData(INITIAL_FORM);
+    setLogoPreview("/placeholder.png");
+    setSelectedFile(null);
   };
 
   const handleSubmit = async (e) => {
@@ -68,13 +70,22 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
     setLoading(true);
 
     try {
+      let companyLogoUrl = formData.companyLogo;
+
+      if (selectedFile) {
+        companyLogoUrl = await upload(selectedFile);
+      } else {
+        toast.error("Please select a company logo");
+        return;
+      }
+
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/experience`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(formData),
+          body: JSON.stringify({ ...formData, companyLogo: companyLogoUrl }),
         }
       );
 
@@ -82,32 +93,19 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
 
       if (res.ok && data.success) {
         toast.success("Experience added successfully!");
-        const formattedData = {
-          _id: data.data._id,
-          ...data.data,
-        };
-        setMainFormData((prev) => [...prev, formattedData]);
-        setOriginalData((prev) => [...prev, formattedData]);
-
-        setFormData({
-          companyLogo: "/placeholder.png",
-          title: "",
-          location: "",
-          timeLine: "",
-          isCurrent: false,
-          keyAchievements: [],
-          technologiesUsed: [],
-        });
-        setLogoPreview("/placeholder.png");
+        const newEntry = { _id: data.data._id, ...data.data };
+        setMainFormData((prev) => [...prev, newEntry]);
+        setOriginalData((prev) => [...prev, newEntry]);
+        resetForm();
         document.getElementById("close-experience-dialog")?.click();
       } else {
         toast.error(data.message || "Failed to add experience");
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Server error");
+      toast.error(error.message || "Server error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -126,149 +124,76 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
           </DialogHeader>
 
           <div className="grid gap-4 mt-4">
-            {/* Company Logo */}
             <div className="grid gap-2">
               <Label>Company Logo</Label>
-              <img
+              <Image
                 src={logoPreview}
                 alt="Logo Preview"
-                className="w-24 h-24 object-contain mb-2 border"
+                width={100}
+                height={100}
+                className="object-contain p-1"
+                unoptimized={logoPreview.startsWith("blob:")}
               />
               <Input type="file" accept="image/*" onChange={handleFileChange} />
+              {uploading && (
+                <div className="text-sm mt-1">Uploading image...</div>
+              )}
             </div>
 
-            {/* Title */}
             <div className="grid gap-2">
               <Label>Title</Label>
               <Input
                 value={formData.title}
-                onChange={(e) => handleChange("title", e.target.value)}
+                onChange={(e) => updateField("title", e.target.value)}
                 placeholder="Enter role title"
                 required
               />
             </div>
 
-            {/* Location */}
             <div className="grid gap-2">
               <Label>Location</Label>
               <Input
                 value={formData.location}
-                onChange={(e) => handleChange("location", e.target.value)}
+                onChange={(e) => updateField("location", e.target.value)}
                 placeholder="Eg. San Francisco, CA"
                 required
               />
             </div>
 
-            {/* Timeline */}
             <div className="grid gap-2">
               <Label>Timeline</Label>
               <Input
                 value={formData.timeLine}
-                onChange={(e) => handleChange("timeLine", e.target.value)}
+                onChange={(e) => updateField("timeLine", e.target.value)}
                 placeholder="Eg. Jan 2023 - Present"
                 disabled={formData.isCurrent}
                 required={!formData.isCurrent}
               />
             </div>
 
-            {/* Current Role Switch */}
             <div className="flex items-center space-x-4 mt-2">
               <Switch
                 checked={formData.isCurrent}
-                onCheckedChange={(checked) =>
-                  handleChange("isCurrent", checked)
-                }
+                onCheckedChange={(checked) => updateField("isCurrent", checked)}
               />
               <span>Current Role</span>
             </div>
 
-            {/* Key Achievements */}
-            <div className="grid gap-2">
-              <Label>Key Achievements</Label>
-              <div className="flex flex-wrap gap-2">
-                {formData.keyAchievements.map((tag, i) => (
-                  <Badge
-                    key={i}
-                    variant={"outline"}
-                    className="flex items-center gap-2 px-2 sm:px-3 py-1 rounded-lg max-w-full break-words"
-                  >
-                    <span className="truncate max-w-[150px] sm:max-w-[200px]">
-                      {tag}
-                    </span>
-                    <button
-                      type="button"
-                      className="text-sm"
-                      onClick={() =>
-                        handleRemoveTag("keyAchievements", i)
-                      }
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  value={newAchievement}
-                  onChange={(e) => setNewAchievement(e.target.value)}
-                  placeholder="Add achievement"
-                />
-                <Button
-                  type="button"
-                  onClick={() =>
-                    handleAddTag(
-                      "keyAchievements",
-                      newAchievement,
-                      setNewAchievement
-                    )
-                  }
-                >
-                  Add
-                </Button>
-              </div>
-            </div>
+            <TagInput
+              label="Key Achievements"
+              tags={formData.keyAchievements}
+              onAdd={(value) => addTag("keyAchievements", value)}
+              onRemove={(i) => removeTag("keyAchievements", i)}
+              placeholder="Add achievement"
+            />
 
-            {/* Technologies Used */}
-            <div className="grid gap-2">
-              <Label>Technologies Used</Label>
-              <div className="flex gap-2 flex-wrap">
-                {formData.technologiesUsed.map((tag, idx) => (
-                  <Badge
-                    key={idx}
-                    variant="outline"
-                    className="flex items-center gap-2 rounded-lg px-3 py-1"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      className="text-sm"
-                      onClick={() => handleRemoveTag("technologiesUsed", idx)}
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <div className="flex gap-2 mt-1">
-                <Input
-                  value={newTechnology}
-                  onChange={(e) => setNewTechnology(e.target.value)}
-                  placeholder="Add technology"
-                />
-                <Button
-                  type="button"
-                  onClick={() =>
-                    handleAddTag(
-                      "technologiesUsed",
-                      newTechnology,
-                      setNewTechnology
-                    )
-                  }
-                >
-                  Add
-                </Button>
-              </div>
-            </div>
+            <TagInput
+              label="Technologies Used"
+              tags={formData.technologiesUsed}
+              onAdd={(value) => addTag("technologiesUsed", value)}
+              onRemove={(i) => removeTag("technologiesUsed", i)}
+              placeholder="Add technology"
+            />
           </div>
 
           <DialogFooter className="mt-6">
@@ -277,7 +202,7 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || uploading}>
               {loading ? "Saving..." : "Save Experience"}
             </Button>
           </DialogFooter>
