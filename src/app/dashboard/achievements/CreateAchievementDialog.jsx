@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useS3Upload } from "@/hooks/useS3Upload";
-import { X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -177,10 +177,10 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Achievement</Button>
+        <Button><Plus /> Add Achievement</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Achievement</DialogTitle>

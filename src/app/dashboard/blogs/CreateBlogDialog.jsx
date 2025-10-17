@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { Plus } from "lucide-react";
 
 export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
   const [formData, setFormData] = useState({
@@ -82,10 +83,10 @@ export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Blog</Button>
+        <Button className="cursor-pointer" ><Plus />Add Blog</Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create new Blog</DialogTitle>

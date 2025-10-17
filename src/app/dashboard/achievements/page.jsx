@@ -118,9 +118,7 @@ export default function AchievementPage() {
         // Update original data with current state
         setOriginalData((prev) =>
           prev.map((ach) =>
-            ach._id === id
-              ? { ...achievements.find((a) => a._id === id) }
-              : ach
+            ach._id === id ? { ...achievements.find((a) => a._id === id) } : ach
           )
         );
       } else {
@@ -156,16 +154,20 @@ export default function AchievementPage() {
 
         <div className="space-y-3">
           {achievements.length === 0 ? (
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <p className="text-muted-foreground">No achievements found.</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click the button above to add your first achievement.
-              </p>
-              <CreateAchievementDialog
-                setMainFormData={setAchievements}
-                setOriginalData={setOriginalData}
-              />
-            </Card>
+            <div className="border-2 border-dashed rounded-lg p-12 text-center">
+              <div className="max-w-sm mx-auto">
+                <h3 className="text-lg font-semibold mb-2">
+                  No Achievements yet
+                </h3>
+                <p className="mb-4">
+                  Get started by creating your first achievement
+                </p>
+                <CreateAchievementDialog
+                  setMainFormData={setAchievements}
+                  setOriginalData={setOriginalData}
+                />
+              </div>
+            </div>
           ) : (
             achievements.map((ach, idx) => (
               <AchievementCard

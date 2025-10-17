@@ -67,9 +67,12 @@ export default function ExperiencePage() {
 
     try {
       const expData = experiences.find((exp) => exp._id === id);
-      
+
       // Upload new logo if it's a blob and logo field has changed
-      if (changedFields.companyLogo?.startsWith("blob:") && expData.selectedFile) {
+      if (
+        changedFields.companyLogo?.startsWith("blob:") &&
+        expData.selectedFile
+      ) {
         try {
           changedFields.companyLogo = await upload(expData.selectedFile);
         } catch (err) {
@@ -93,7 +96,9 @@ export default function ExperiencePage() {
         toast.success("Experience updated successfully!");
         // Update original data with current state
         setOriginalData((prev) =>
-          prev.map((exp) => (exp._id === id ? { ...experiences.find(e => e._id === id) } : exp))
+          prev.map((exp) =>
+            exp._id === id ? { ...experiences.find((e) => e._id === id) } : exp
+          )
         );
       } else {
         toast.error(data.message || "Failed to update experience");
@@ -128,16 +133,18 @@ export default function ExperiencePage() {
 
         <div className="space-y-3">
           {experiences.length === 0 ? (
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <p className="text-muted-foreground">No experiences found.</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click the button above to add your first experience.
-              </p>
-              <CreateExperienceDialog
-                setMainFormData={setExperiences}
-                setOriginalData={setOriginalData}
-              />
-            </Card>
+            <div className="border-2 border-dashed rounded-lg p-12 text-center">
+              <div className="max-w-sm mx-auto">
+                <h3 className="text-lg font-semibold mb-2">No Experience yet</h3>
+                <p className="mb-4">
+                  Get started by creating your first experience
+                </p>
+                <CreateExperienceDialog
+                  setMainFormData={setExperiences}
+                  setOriginalData={setOriginalData}
+                />
+              </div>
+            </div>
           ) : (
             experiences.map((exp, idx) => (
               <ExperienceCard

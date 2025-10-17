@@ -16,9 +16,12 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/blog`, {
-          credentials: "include",
-        });
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/blog`,
+          {
+            credentials: "include",
+          }
+        );
         const data = await res.json();
 
         if (data.success) {
@@ -48,7 +51,9 @@ export default function BlogPage() {
 
   const handleChange = (field, value, blogId) => {
     setFormData((prev) =>
-      prev.map((blog) => (blog._id === blogId ? { ...blog, [field]: value } : blog))
+      prev.map((blog) =>
+        blog._id === blogId ? { ...blog, [field]: value } : blog
+      )
     );
   };
 
@@ -68,12 +73,15 @@ export default function BlogPage() {
 
     setSaving(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/blog/${blogId}`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/blog/${blogId}`,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -104,19 +112,27 @@ export default function BlogPage() {
     <div className="min-h-screen bg-background p-6 max-[800px]:p-2">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-foreground max-[800px]:text-xl">Blog Page</h1>
-          <CreateBlogDialog setMainFormData={setFormData} setOriginalData={setOriginalData} />
+          <h1 className="text-3xl font-bold text-foreground max-[800px]:text-xl">
+            Blog Page
+          </h1>
+          <CreateBlogDialog
+            setMainFormData={setFormData}
+            setOriginalData={setOriginalData}
+          />
         </div>
 
         <div className="space-y-3">
           {formData.length === 0 ? (
-            <Card className="p-6 flex flex-col items-center justify-center text-center">
-              <p className="text-muted-foreground">No blogs found.</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Click the button above to add your first blog.
-              </p>
-              <CreateBlogDialog setMainFormData={setFormData} setOriginalData={setOriginalData} />
-            </Card>
+            <div className="border-2 border-dashed rounded-lg p-12 text-center">
+              <div className="max-w-sm mx-auto">
+                <h3 className="text-lg font-semibold mb-2">No Blog yet</h3>
+                <p className="mb-4">Get started by creating your first blog</p>
+                <CreateBlogDialog
+                  setMainFormData={setFormData}
+                  setOriginalData={setOriginalData}
+                />
+              </div>
+            </div>
           ) : (
             formData.map((blog) => {
               const originalBlog = originalData.find((b) => b._id === blog._id);

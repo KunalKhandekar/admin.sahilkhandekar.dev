@@ -11,6 +11,8 @@ import { useS3Upload } from "@/hooks/useS3Upload";
 import { Camera, Loader2, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import FormField from "@/components/FormField";
+import FormTextarea from "@/components/FormTextarea";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -290,13 +292,13 @@ function ProfilePictureUpload({ src, onUpload }) {
           <AvatarFallback>IMG</AvatarFallback>
         </Avatar>
 
-        <label
+        <Label
           htmlFor="profilePicUpload"
           className="absolute bottom-0 right-0 bg-muted p-2 rounded-full cursor-pointer hover:bg-muted/80 transition-colors"
         >
           <Camera className="w-4 h-4" />
-        </label>
-        <input
+        </Label>
+        <Input
           id="profilePicUpload"
           type="file"
           className="hidden"
@@ -305,36 +307,6 @@ function ProfilePictureUpload({ src, onUpload }) {
         />
       </div>
       <p className="text-sm text-muted-foreground">Click icon to upload</p>
-    </div>
-  );
-}
-
-function FormField({ id, label, value, onChange, placeholder }) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
-    </div>
-  );
-}
-
-function FormTextarea({ id, label, value, onChange, placeholder, rows }) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Textarea
-        id={id}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        rows={rows}
-        className="resize-none"
-      />
     </div>
   );
 }

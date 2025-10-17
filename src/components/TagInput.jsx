@@ -16,9 +16,16 @@ export const TagInput = ({ label, tags, onAdd, onRemove, placeholder }) => {
     }
   };
 
+   const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
   return (
     <div className="grid gap-2">
-      <Label>{label}</Label>
+      <Label className="text-sm font-semibold text-foreground sm:text-base" >{label}</Label>
       <div className="flex flex-wrap gap-2">
         {tags.map((tag, i) => (
           <Badge
@@ -38,6 +45,8 @@ export const TagInput = ({ label, tags, onAdd, onRemove, placeholder }) => {
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
+          onKeyPress={handleKeyPress}
+          className="text-sm text-foreground sm:text-base"
         />
         <Button type="button" onClick={handleAdd}>
           Add
