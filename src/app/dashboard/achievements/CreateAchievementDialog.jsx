@@ -1,5 +1,6 @@
 "use client";
 
+import FormField from "@/components/FormField";
 import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import {
@@ -65,10 +66,10 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
     if (file) {
       const newPreviews = [...imagePreviews];
       newPreviews[imgIndex] = URL.createObjectURL(file);
-      
+
       const newFiles = [...selectedImageFiles];
       newFiles[imgIndex] = file;
-      
+
       setImagePreviews(newPreviews);
       setSelectedImageFiles(newFiles);
     }
@@ -177,10 +178,15 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button><Plus /> Add Achievement</Button>
+        <Button>
+          <Plus /> Add Achievement
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create New Achievement</DialogTitle>
@@ -192,7 +198,9 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
           <div className="grid gap-4 mt-4">
             {/* Company Logo */}
             <div className="grid gap-2">
-              <Label>Company Logo *</Label>
+              <Label className="text-sm font-semibold text-foreground sm:text-base">
+                Company Logo *
+              </Label>
               <div className="relative w-24 h-24 border rounded">
                 <Image
                   src={logoPreview}
@@ -212,40 +220,42 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
 
             {/* Title */}
             <div className="grid gap-2">
-              <Label>Title *</Label>
-              <Input
+              <FormField
+                id="title"
+                label="Title"
                 value={formData.title}
                 onChange={(e) => updateField("title", e.target.value)}
                 placeholder="e.g., Winner of Hackathon 2024"
-                required
               />
             </div>
 
             {/* Timeline */}
             <div className="grid gap-2">
-              <Label>Timeline *</Label>
-              <Input
+              <FormField
+                id="timeline"
+                label="Timeline"
                 value={formData.timeLine}
                 onChange={(e) => updateField("timeLine", e.target.value)}
                 placeholder="e.g., March 2024"
-                required
               />
             </div>
 
             {/* Description Title */}
             <div className="grid gap-2">
-              <Label>Description Title *</Label>
-              <Input
+              <FormField
+                id="descriptionTitle"
+                label="Description Title"
                 value={formData.descriptionTitle}
-                onChange={(e) => updateField("descriptionTitle", e.target.value)}
+                onChange={(e) =>
+                  updateField("descriptionTitle", e.target.value)
+                }
                 placeholder="e.g., Project Overview"
-                required
               />
             </div>
 
             {/* Description Points */}
             <TagInput
-              label="Description Points *"
+              label="Description Points"
               tags={formData.descriptionPoints}
               onAdd={(value) => addTag("descriptionPoints", value)}
               onRemove={(i) => removeTag("descriptionPoints", i)}
@@ -255,7 +265,9 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
             {/* Images (Max 2) */}
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label>Achievement Images (Max 2) *</Label>
+                <Label className="text-sm font-semibold text-foreground sm:text-base">
+                  Achievement Images (Max 2) *
+                </Label>
                 {imagePreviews.length < 2 && (
                   <Button
                     type="button"
@@ -290,7 +302,7 @@ export function CreateAchievementDialog({ setMainFormData, setOriginalData }) {
                             <span className="text-sm">No image selected</span>
                           </div>
                         )}
-                        
+
                         {/* Overlay with actions - visible on mobile, hover on desktop */}
                         <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                           <label className="cursor-pointer">

@@ -4,94 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTwitter } from "@/hooks/useTwitter";
 import { Loader2, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 export default function TwitterPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [twitterIds, setTwitterIds] = useState([]);
-  const [originalData, setOriginalData] = useState([]);
-  const [tweetId, setTweetId] = useState("");
+  const {
+    loading,
+    saving,
+    twitterIds,
+    tweetId,
+    setTweetId,
+    handleAddTweet,
+    handleSubmit,
+    hasChanges,
+  } = useTwitter();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/tweetIds`,
-          { credentials: "include" }
-        );
-        const data = await res.json();
-
-        if (data.success) {
-          setTwitterIds(data.data.tweetIds);
-          setOriginalData(data.data.tweetIds);
-        } else {
-          toast.error("Failed to load data");
-        }
-      } catch (error) {
-        console.error(error);
-        toast.error("Error fetching data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleAddTweet = () => {
-    if (!tweetId.trim()) return toast.error("Tweet ID cannot be empty");
-
-    const cleanId = tweetId.trim();
-
-    if (cleanId.length < 19 ) {
-      return toast.error("Invalid Tweet ID");
-    }
-
-    if (twitterIds.includes(cleanId)) {
-      return toast.error("Tweet ID already exists");
-    }
-
-    const updated = [cleanId, ...twitterIds].slice(0, 6);
-    setTwitterIds(updated);
-    setTweetId("");
-  };
-
-  const hasChanges = () => {
-    return JSON.stringify(twitterIds) !== JSON.stringify(originalData);
-  };
-
-  const handleSubmit = async () => {
-    if (!hasChanges()) return;
-
-    setSaving(true);
-    try {
-      const payload = { tweetIds : twitterIds };
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/tweetIds`,
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        toast.success("Changes saved successfully!");
-        setOriginalData(twitterIds);
-      } else {
-        toast.error(data.message || "Failed to update");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error(error.message || "Failed to update");
-    } finally {
-      setSaving(false);
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddTweet();
     }
   };
 
@@ -123,6 +54,7 @@ export default function TwitterPage() {
                     value={tweetId}
                     onChange={(e) => setTweetId(e.target.value)}
                     placeholder="Enter your latest tweetId"
+                    onKeyPress={handleKeyPress}
                   />
                   <Button onClick={handleAddTweet} disabled={!tweetId.trim()}>
                     Add

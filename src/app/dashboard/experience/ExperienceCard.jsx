@@ -1,3 +1,4 @@
+import FormField from "@/components/FormField";
 import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,7 +48,9 @@ export const ExperienceCard = ({
         <div className="grid gap-4">
           {/* Company Logo */}
           <div className="grid gap-2">
-            <Label>Company Logo</Label>
+            <Label className="text-sm font-semibold text-foreground sm:text-base">
+              Company Logo
+            </Label>
             <div className="relative w-24 h-24 border rounded">
               <Image
                 src={exp.companyLogo}
@@ -62,28 +65,34 @@ export const ExperienceCard = ({
 
           {/* Title */}
           <div className="grid gap-2">
-            <Label>Title</Label>
-            <Input
+            <FormField
+              id="title"
+              label="Title"
               value={exp.title}
               onChange={(e) => updateField("title", e.target.value)}
+              placeholder="Enter role title"
             />
           </div>
 
           {/* Location */}
           <div className="grid gap-2">
-            <Label>Location</Label>
-            <Input
+            <FormField
+              id="location"
+              label="Location"
               value={exp.location}
               onChange={(e) => updateField("location", e.target.value)}
+              placeholder="Eg. Remote"
             />
           </div>
 
           {/* Timeline */}
           <div className="grid gap-2">
-            <Label>Timeline</Label>
-            <Input
+            <FormField
+              id="timeline"
+              label="Timeline"
               value={exp.timeLine}
               onChange={(e) => updateField("timeLine", e.target.value)}
+              placeholder="Eg. May 2025 - Jun 2025"
             />
           </div>
 
@@ -93,7 +102,9 @@ export const ExperienceCard = ({
               checked={exp.isCurrent}
               onCheckedChange={(checked) => updateField("isCurrent", checked)}
             />
-            <span>Current Role</span>
+            <Label className="text-sm font-semibold text-foreground sm:text-base">
+              Current Role
+            </Label>
           </div>
 
           {/* Key Achievements */}

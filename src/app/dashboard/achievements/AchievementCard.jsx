@@ -1,3 +1,4 @@
+import FormField from "@/components/FormField";
 import { TagInput } from "@/components/TagInput";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,10 +44,10 @@ export const AchievementCard = ({
       const previewURL = URL.createObjectURL(file);
       const newImages = [...achievement.images];
       newImages[imgIndex] = previewURL;
-      
+
       const newFiles = achievement.selectedImageFiles || [];
       newFiles[imgIndex] = file;
-      
+
       onUpdate(achievement._id, "images", newImages);
       onUpdate(achievement._id, "selectedImageFiles", newFiles);
     }
@@ -71,13 +72,13 @@ export const AchievementCard = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Achievement {index + 1}</CardTitle>
+        <CardTitle className="text-lg">Achievement {index + 1}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4">
           {/* Company Logo */}
           <div className="grid gap-2">
-            <Label>Company Logo</Label>
+            <Label className="text-sm font-semibold text-foreground sm:text-base">Company Logo</Label>
             <div className="relative w-24 h-24 border rounded">
               <Image
                 src={achievement.companyLogo}
@@ -87,17 +88,14 @@ export const AchievementCard = ({
                 unoptimized={achievement.companyLogo.startsWith("blob:")}
               />
             </div>
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleLogoChange}
-            />
+            <Input type="file" accept="image/*" onChange={handleLogoChange} />
           </div>
 
           {/* Title */}
           <div className="grid gap-2">
-            <Label>Title</Label>
-            <Input
+            <FormField
+              id="title"
+              label="Title"
               value={achievement.title}
               onChange={(e) => updateField("title", e.target.value)}
               placeholder="e.g., Winner of Hackathon 2024"
@@ -106,8 +104,9 @@ export const AchievementCard = ({
 
           {/* Timeline */}
           <div className="grid gap-2">
-            <Label>Timeline</Label>
-            <Input
+            <FormField
+              id="timeline"
+              label="Timeline"
               value={achievement.timeLine}
               onChange={(e) => updateField("timeLine", e.target.value)}
               placeholder="e.g., March 2024"
@@ -116,8 +115,9 @@ export const AchievementCard = ({
 
           {/* Description Title */}
           <div className="grid gap-2">
-            <Label>Description Title</Label>
-            <Input
+            <FormField
+              id="descriptionTitle"
+              label="Description Title"
               value={achievement.descriptionTitle}
               onChange={(e) => updateField("descriptionTitle", e.target.value)}
               placeholder="e.g., Project Overview"
@@ -136,7 +136,7 @@ export const AchievementCard = ({
           {/* Images (Max 2) */}
           <div className="grid gap-2">
             <div className="flex items-center justify-between">
-              <Label>Achievement Images (Max 2)</Label>
+              <Label className="text-sm font-semibold text-foreground sm:text-base">Achievement Images (Max 2)</Label>
               {achievement.images.length < 2 && (
                 <Button
                   type="button"
@@ -167,7 +167,7 @@ export const AchievementCard = ({
                           unoptimized={img.startsWith("blob:")}
                         />
                       )}
-                      
+
                       {/* Overlay with actions - visible on mobile, hover on desktop */}
                       <div className="absolute inset-0 bg-black/50 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <label className="cursor-pointer">

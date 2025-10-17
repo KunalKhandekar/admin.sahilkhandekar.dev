@@ -115,7 +115,6 @@ export default function AchievementPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         toast.success("Achievement updated successfully!");
-        // Update original data with current state
         setOriginalData((prev) =>
           prev.map((ach) =>
             ach._id === id ? { ...achievements.find((a) => a._id === id) } : ach

@@ -23,7 +23,7 @@ export const LanguageInput = ({ languages = [], onAdd, onRemove }) => {
       return;
     }
 
-    // ✅ Check if total + new value exceeds 100
+    // Check if total + new value exceeds 100
     const wouldBeTotal =
       languages.reduce((sum, lang) => sum + lang.percent, 0) + percentNum;
     if (wouldBeTotal > 100) {

@@ -33,7 +33,6 @@ const data = {
       title: "Navigations",
       items: [
         { title: "About", url: "/dashboard/about", icon: User },
-        { title: "Overview", url: "/dashboard/overview", icon: LayoutDashboard },
         { title: "Projects", url: "/dashboard/projects", icon: FolderOpen },
         { title: "Achievements", url: "/dashboard/achievements", icon: Award },
         { title: "Experience", url: "/dashboard/experience", icon: Briefcase },

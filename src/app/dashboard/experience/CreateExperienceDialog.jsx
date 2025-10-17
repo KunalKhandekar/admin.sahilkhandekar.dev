@@ -16,22 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useS3Upload } from "@/hooks/useS3Upload";
+import { useExperience } from "@/hooks/useExperience";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { toast } from "sonner";
+import FormField from "@/components/FormField";
 
-const INITIAL_FORM = {
-  companyLogo: "/placeholder.png",
-  title: "",
-  location: "",
-  timeLine: "",
-  isCurrent: false,
-  keyAchievements: [],
-  technologiesUsed: [],
-};
-
-export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
+export function CreateExperienceDialog() {
+  const { createExperience, INITIAL_FORM } = useExperience();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
   const [logoPreview, setLogoPreview] = useState("/placeholder.png");
@@ -70,52 +62,31 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      let companyLogoUrl = formData.companyLogo;
+    const result = await createExperience(
+      { ...formData, selectedFile },
+      upload
+    );
 
-      if (selectedFile) {
-        companyLogoUrl = await upload(selectedFile);
-      } else {
-        toast.error("Please select a company logo");
-        return;
-      }
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/admin/experience`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ ...formData, companyLogo: companyLogoUrl }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        toast.success("Experience added successfully!");
-        const newEntry = { _id: data.data._id, ...data.data };
-        setMainFormData((prev) => [...prev, newEntry]);
-        setOriginalData((prev) => [...prev, newEntry]);
-        resetForm();
-        document.getElementById("close-experience-dialog")?.click();
-      } else {
-        toast.error(data.message || "Failed to add experience");
-      }
-    } catch (error) {
-      toast.error(error.message || "Server error");
-    } finally {
-      setLoading(false);
+    if (result) {
+      resetForm();
+      document.getElementById("close-experience-dialog")?.click();
     }
+
+    setLoading(false);
   };
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer" ><Plus /> Add Experience</Button>
+        <Button className="cursor-pointer">
+          <Plus /> Add Experience
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create new Experience</DialogTitle>
@@ -126,9 +97,11 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
 
           <div className="grid gap-4 mt-4">
             <div className="grid gap-2">
-              <Label>Company Logo</Label>
+              <Label className="text-sm font-semibold text-foreground sm:text-base">
+                Company Logo
+              </Label>
               <Image
-                src={logoPreview}
+                src={logoPreview || "/placeholder.svg"}
                 alt="Logo Preview"
                 width={100}
                 height={100}
@@ -142,33 +115,32 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
             </div>
 
             <div className="grid gap-2">
-              <Label>Title</Label>
-              <Input
+              <FormField
+                id="title"
+                label="Title"
                 value={formData.title}
                 onChange={(e) => updateField("title", e.target.value)}
                 placeholder="Enter role title"
-                required
               />
             </div>
 
             <div className="grid gap-2">
-              <Label>Location</Label>
-              <Input
+              <FormField
+                id="location"
+                label="Location"
                 value={formData.location}
                 onChange={(e) => updateField("location", e.target.value)}
-                placeholder="Eg. San Francisco, CA"
-                required
+                placeholder="Eg. Remote"
               />
             </div>
 
             <div className="grid gap-2">
-              <Label>Timeline</Label>
-              <Input
+              <FormField
+                id="timeline"
+                label="Timeline"
                 value={formData.timeLine}
                 onChange={(e) => updateField("timeLine", e.target.value)}
-                placeholder="Eg. Jan 2023 - Present"
-                disabled={formData.isCurrent}
-                required={!formData.isCurrent}
+                placeholder="Eg. May 2025 - Jun 2025"
               />
             </div>
 
@@ -177,7 +149,9 @@ export function CreateExperienceDialog({ setMainFormData, setOriginalData }) {
                 checked={formData.isCurrent}
                 onCheckedChange={(checked) => updateField("isCurrent", checked)}
               />
-              <span>Current Role</span>
+              <Label className="text-sm font-semibold text-foreground sm:text-base">
+                Current Role
+              </Label>
             </div>
 
             <TagInput

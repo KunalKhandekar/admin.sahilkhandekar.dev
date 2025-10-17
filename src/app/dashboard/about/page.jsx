@@ -1,89 +1,28 @@
 "use client";
 
+import FormField from "@/components/FormField";
+import FormTextarea from "@/components/FormTextarea";
+import ReadmeEditor from "@/components/ReadmeEditor";
+import { TagInput } from "@/components/TagInput";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { TagInput } from "@/components/TagInput";
-import { useS3Upload } from "@/hooks/useS3Upload";
+import { useAbout } from "@/hooks/useAbout";
 import { Camera, Loader2, Save } from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import FormField from "@/components/FormField";
-import FormTextarea from "@/components/FormTextarea";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-const INITIAL_FORM = {
-  profilePic: "",
-  selectedFile: null,
-  name: "",
-  role: "",
-  miniDescription: "",
-  description: "",
-  currentFocus: "",
-  skills: [],
-};
 
 export default function AboutPage() {
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_FORM);
-  const [originalData, setOriginalData] = useState({});
-  const { upload } = useS3Upload();
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/admin/about`, {
-        credentials: "include",
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        const formatted = {
-          profilePic: data.data.profilePic || "",
-          name: data.data.name || "",
-          role: data.data.role || "",
-          miniDescription: data.data.miniDescription || "",
-          description: data.data.description || "",
-          currentFocus: data.data.currentFocus || "",
-          skills: data.data.skills || [],
-        };
-
-        setFormData(formatted);
-        setOriginalData(formatted);
-      } else {
-        toast.error("Failed to load data");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Error fetching data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const profilePreview = URL.createObjectURL(file);
-    setFormData((prev) => ({
-      ...prev,
-      selectedFile: file,
-      profilePic: profilePreview,
-    }));
-  };
+  const {
+    loading,
+    saving,
+    formData,
+    handleChange,
+    handleImageUpload,
+    handleSubmit,
+    hasChanges,
+    setFormData,
+  } = useAbout();
 
   const handleAddSkill = (skill) => {
     setFormData((prev) => ({
@@ -99,79 +38,6 @@ export default function AboutPage() {
     }));
   };
 
-  const getChangedFields = () => {
-    const changes = {};
-
-    Object.keys(formData).forEach((key) => {
-      if (key === "selectedFile" || key === "profilePic") return;
-
-      if (key === "skills") {
-        const current = [...formData.skills].sort();
-        const original = [...(originalData.skills || [])].sort();
-
-        if (JSON.stringify(current) !== JSON.stringify(original)) {
-          changes[key] = formData.skills;
-        }
-      } else if (
-        formData[key]?.toString().trim() !==
-        originalData[key]?.toString().trim()
-      ) {
-        changes[key] = formData[key];
-      }
-    });
-
-    return changes;
-  };
-
-  const hasChanges = () => {
-    if (formData.selectedFile) return true;
-    return Object.keys(getChangedFields()).length > 0;
-  };
-
-  const handleSubmit = async () => {
-    const changedPayload = getChangedFields();
-    if (!hasChanges()) return;
-
-    setSaving(true);
-
-    try {
-      if (formData.selectedFile) {
-        const newImageKey = await upload(formData.selectedFile);
-        changedPayload.profilePic = newImageKey;
-      }
-
-      const res = await fetch(`${BACKEND_URL}/api/admin/about`, {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(changedPayload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        toast.success("Updated successfully!");
-
-        const newOriginalData = { ...formData };
-        delete newOriginalData.selectedFile;
-
-        if (changedPayload.profilePic) {
-          newOriginalData.profilePic = changedPayload.profilePic;
-        }
-
-        setOriginalData(newOriginalData);
-        setFormData((prev) => ({ ...prev, selectedFile: null }));
-      } else {
-        toast.error(data.message || "Update failed");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Error updating data");
-    } finally {
-      setSaving(false);
-    }
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -182,7 +48,7 @@ export default function AboutPage() {
 
   return (
     <div className="min-h-screen bg-background p-6 max-[800px]:p-2">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold text-foreground max-[800px]:text-xl">
           About Page
         </h1>
@@ -248,6 +114,11 @@ export default function AboutPage() {
               placeholder="Add a skill..."
             />
 
+            <ReadmeEditor
+              content={formData.aboutReadme}
+              onChange={(val) => handleChange("aboutReadme", val)}
+            />
+
             {/* Save Section */}
             <div className="flex items-center justify-between pt-4">
               <p className="text-sm text-muted-foreground">
@@ -303,7 +174,7 @@ function ProfilePictureUpload({ src, onUpload }) {
           type="file"
           className="hidden"
           accept="image/png, image/jpeg, image/webp"
-          onChange={onUpload}
+          onChange={(e) => onUpload(e.target.files[0])}
         />
       </div>
       <p className="text-sm text-muted-foreground">Click icon to upload</p>

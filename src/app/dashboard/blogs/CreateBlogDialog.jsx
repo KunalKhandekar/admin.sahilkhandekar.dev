@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import FormField from "@/components/FormField";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,20 +11,21 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+
+const INITIAL_FORM = {
+  title: "",
+  excerpt: "",
+  date: "",
+  readTime: "",
+  category: "",
+  mediumLink: "",
+};
 
 export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    excerpt: "",
-    date: "",
-    readTime: "",
-    category: "",
-    mediumLink: "",
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM);
 
   const [loading, setLoading] = useState(false);
 
@@ -61,14 +62,7 @@ export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
         };
         setMainFormData((prev) => [...prev, formatedData]);
         setOriginalData((prev) => [...prev, formatedData]);
-        setFormData({
-          title: "",
-          excerpt: "",
-          date: "",
-          readTime: "",
-          category: "",
-          mediumLink: "",
-        });
+        setFormData(INITIAL_FORM);
         document.getElementById("close-blog-dialog")?.click();
       } else {
         toast.error(data.message || "Something went wrong");
@@ -83,10 +77,16 @@ export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer" ><Plus />Add Blog</Button>
+        <Button className="cursor-pointer">
+          <Plus />
+          Add Blog
+        </Button>
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent
+        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto"
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Create new Blog</DialogTitle>
@@ -105,13 +105,12 @@ export function CreateBlogDialog({ setMainFormData, setOriginalData }) {
               mediumLink: "Medium Link",
             }).map(([key, label]) => (
               <div className="grid gap-2" key={key}>
-                <Label htmlFor={key}>{label}</Label>
-                <Input
+                <FormField
                   id={key}
+                  label={label}
                   value={formData[key]}
                   onChange={(e) => handleChange(key, e.target.value)}
                   placeholder={`Enter ${label}`}
-                  required
                 />
               </div>
             ))}
