@@ -32,6 +32,7 @@ const INITIAL_FORM = {
   tags: [],
   developmentSummary: [],
   languagesUsed: [],
+  stack: "",
 };
 
 export const CreateProjectDialog = ({ setOriginalData, setProjects }) => {
@@ -86,7 +87,7 @@ export const CreateProjectDialog = ({ setOriginalData, setProjects }) => {
 
       if (res.ok && data.success) {
         toast.success("Project added successfully!");
-        const newEntry = { _id: data.data._id, ...data.data };
+        const newEntry = { _id: data.data._id, ...data.data, selectedImageFiles: [] };
         setProjects((prev) => [...prev, newEntry]);
         setOriginalData((prev) => [...prev, newEntry]);
         resetForm();
@@ -122,7 +123,7 @@ export const CreateProjectDialog = ({ setOriginalData, setProjects }) => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="grid gap-4 mt-4 overflow-x-hidden">
+          <div className="grid gap-4 mt-4 p-2">
             <FormField
               id="name"
               label="Name"
@@ -170,6 +171,14 @@ export const CreateProjectDialog = ({ setOriginalData, setProjects }) => {
               value={formData.liveLink}
               onChange={(e) => updateField("liveLink", e.target.value)}
               placeholder="Enter project Live Link"
+            />
+
+            <FormField
+              id="stack"
+              label="Stack"
+              value={formData.stack}
+              onChange={(e) => updateField("stack", e.target.value)}
+              placeholder="Enter project stack"
             />
 
             <ImageGallery
@@ -227,6 +236,8 @@ export const CreateProjectDialog = ({ setOriginalData, setProjects }) => {
                 )
               }
             />
+
+            
           </div>
 
           <DialogFooter className="mt-6">

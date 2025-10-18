@@ -74,6 +74,14 @@ export const ProjectCard = ({
           placeholder="Enter project Live Link"
         />
 
+        <FormField
+          id="stack"
+          label="Stack"
+          value={project.stack}
+          onChange={(e) => updateField("stack", e.target.value)}
+          placeholder="Enter project stack"
+        />
+
         <ImageGallery
           selectedImageFiles={project.selectedImageFiles}
           images={project.images}

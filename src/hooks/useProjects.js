@@ -29,6 +29,7 @@ export const useProjects = () => {
               tags: project.tags || [],
               developmentSummary: project.developmentSummary || [],
               languagesUsed: project.languagesUsed || [],
+              stack: project.stack || "",
               selectedImageFiles: [],
             };
           });
