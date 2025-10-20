@@ -85,7 +85,8 @@ export const useExperience = () => {
         setOriginalData((prev) => [...prev, newEntry]);
         return newEntry;
       } else {
-        toast.error(data.message || "Failed to add experience");
+        console.log(data);
+        toast.error(data.errors[0] || "Failed to add experience");
         return null;
       }
     } catch (error) {

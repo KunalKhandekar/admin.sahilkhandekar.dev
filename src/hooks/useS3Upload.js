@@ -17,7 +17,7 @@ export const useS3Upload = () => {
           credentials: "include",
           body: JSON.stringify({ fileName: file.name, contentType: file.type }),
         }
-      );
+      ); 
 
       const data = await res.json();
       if (!data.success)
