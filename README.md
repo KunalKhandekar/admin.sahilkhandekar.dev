@@ -2,7 +2,7 @@
 
 An **Admin Panel** for managing the content of Sahil Khandekar's portfolio website. This panel allows you to update **About, Projects, Achievements, Experience, Twitter, and Blogs** easily through a user-friendly interface.
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/78457c93-8df6-4b2b-afa3-7cac5f98c4c3" />
+<img width="1919" height="1079" alt="image" src="https://dzdw2zccyu2wu.cloudfront.net/github/admin-panel.png" />
 
 
 ## Live & Code
